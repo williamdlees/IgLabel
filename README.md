@@ -1,5 +1,5 @@
 # IgLabel
-##Manage allocation of temporary labels for IG alleles
+## Manage allocation of temporary labels for IG alleles
 
 This script will allocate 'temporary labels' for newly discovered IG alleles in accordance with 
 the schema and process defined by the 
@@ -14,7 +14,7 @@ Outline schema for germline database management:
 - [document](), [schema]() (links not working as yet, to be updated)
 - [Specification for this script](https://docs.google.com/document/d/1Top32CXCL2uOyjfHl54ebJEG43Jnc2oAoRjq5e6niEA/edit?usp=sharing)
 
-##Installation
+## Installation
 
 The script requires Python 3.6 or later, with BioPython installed. Clone the repo to your workstation to use it.
 
