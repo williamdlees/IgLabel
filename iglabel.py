@@ -25,7 +25,7 @@ parser_query.add_argument('action_file', help='list of results (CSV)')
 
 parser_add = subparsers.add_parser('add', parents=[parent_parser], help='Add sequences to database')
 parser_add.add_argument('database_file', help='allocation database')
-parser_add.add_argument('action_file', help='list of sequences to add (FASTA)')
+parser_add.add_argument('action_file', help='list of actions to carry out (from iglabel.py query)')
 parser_add.add_argument('contributor', help='Name of contributor')
 
 
