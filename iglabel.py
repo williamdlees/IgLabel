@@ -2,8 +2,9 @@
 
 
 import argparse
+import random
 from datetime import datetime
-
+import base64
 import simple_bio_seq as simple
 import csv
 import os.path
@@ -26,7 +27,6 @@ parser_add = subparsers.add_parser('add', parents=[parent_parser], help='Add seq
 parser_add.add_argument('database_file', help='allocation database')
 parser_add.add_argument('action_file', help='list of sequences to add (FASTA)')
 parser_add.add_argument('contributor', help='Name of contributor')
-parser_add.add_argument('result_file', help='list of results (CSV)')
 
 
 # database columns
@@ -144,7 +144,7 @@ def query_database(args):
     with open(args.result_file, 'w', newline='') as fo, open(args.action_file, 'w', newline='') as fa:
         res_writer = csv.DictWriter(fo, fieldnames=query_result_cols)
         res_writer.writeheader()
-        act_writer = csv.DictWriter(fo, fieldnames=action_table_cols)
+        act_writer = csv.DictWriter(fa, fieldnames=action_table_cols)
         act_writer.writeheader()
 
         for seq_id, seq in query_seqs.items():
@@ -158,6 +158,7 @@ def query_database(args):
                 action['reason'] = res['match']
                 act_writer.writerow(action)
             else:
+                match_found = False
                 for row in label_database.values():
                     res['match'] = ''
                     if seq == row['longest_seq']:
@@ -172,19 +173,34 @@ def query_database(args):
                         res['match'] = 'query_is_super'
 
                     if res['match'] != '':
+                        match_found = True
                         res['matched_label'] = row['label']
                         res['matched_sequence'] = row['longest_seq']
                         res_writer.writerow(res)
-                        if actions_and_priorities[res['match']][1] < actions_and_priorities[action['reason'][1]]:
-                            action['action'] = actions_and_priorities[res['match']]
+                        if actions_and_priorities[res['match']][1] < actions_and_priorities[action['reason']][1]:
+                            action['action'] = actions_and_priorities[res['match']][0]
                             action['label'] = res['matched_label']
                             action['reason'] = res['match']
+
+                if not match_found:
+                    res_writer.writerow(res)
 
                 act_writer.writerow(action)
 
 
 def generate_new_label(label_database):
-    return('foo')
+    i = 0
+    while i < 10000000:
+        s = random.randint(0, 2**20 - 1).to_bytes(5, 'big')
+        l = base64.b32encode(s)[4:].decode()
+        if l not in label_database:
+            return l
+
+        if i == 100000:
+            print('Warning: label namespace is getting full. Perhaps the database is getting too large?')
+
+    print("Error: namespace is reaching exhaustion. Can't allocate a new label in a reasonable amount of time.")
+    exit(0)
 
 def add_database(args):
     label_database = read_label_database(args.database_file)
@@ -196,8 +212,12 @@ def add_database(args):
         print('Action file "%s" not found' % args.action_file)
         return
 
-    # before we go any further, conduct some sanity checks on the action file
+    # Try allocating a new label. This will provoke a warning, or even an error, if the namespace is getting full.
+    # (this label isn't used, so won't contribute to the problem)
 
+    generate_new_label(label_database)
+
+    # before we go any further, conduct some sanity checks on the action file
 
     with open(args.action_file, 'r') as fi:
         reader = csv.DictReader(fi)
@@ -227,7 +247,7 @@ def add_database(args):
                 }
                 label_database[entry['label']] = entry
             elif row['action'] == 'add_new_subset':
-                if row['sequence'] not in label_database[row['label']]['longest']:
+                if row['sequence'] not in label_database[row['label']]['longest_seq']:
                     print('Error. Sequence id %s is not a subset of label %s. Action ignored.' % (row['seq_id'], row['label']))
                     continue
                 for seq in label_database[row['label']]['sequences']:
@@ -237,12 +257,12 @@ def add_database(args):
 
                 label_database[row['label']]['sequences'] += ',' + row['sequence']
             elif row['action'] == 'add_new_superset':
-                if label_database[row['label']]['longest'] not in row['sequence']:
+                if label_database[row['label']]['longest_seq'] not in row['sequence']:
                     print('Error. Sequence id %s is not a superset of label %s. Action ignored.')
                     continue
 
                 label_database[row['label']]['sequences'] += ',' + row['sequence']
-                label_database[row['label']]['longest'] = row['sequence']
+                label_database[row['label']]['longest_seq'] = row['sequence']
 
     write_label_database(label_database, args.database_file)
 
