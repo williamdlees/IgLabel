@@ -182,11 +182,11 @@ writing postponed queries to seq3_postponed.fasta
 ```
 Results file:
 
-![results.csv](results4.PNG)
+![results.csv](results4.png)
 
 Actions file:
 
-![actions.csv](actions4.PNG)
+![actions.csv](actions4.png)
 
 
 
