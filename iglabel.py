@@ -72,8 +72,8 @@ def read_label_database(database_file):
 
 
 def write_label_database(label_database, database_file):
-    if '.' in database_file:
-        backup_database_file = database_file.replace('.', '_old.')
+    if '.csv' in database_file:
+        backup_database_file = database_file.replace('.csv', '_old.csv')
     else:
         backup_database_file = database_file + '_old'
 
@@ -124,11 +124,12 @@ action_table_cols = [
 
 actions_and_priorities = {
     'invalid_nuc': ('none', 1),       # highest priority - never take any action on a sequence with invalid nucleotides
-    'exact': ('none', 2),
-    'query_is_existing_sub': ('none', 3),
-    'query_is_super': ('add_new_superset', 4),
-    'query_is_new_sub': ('add_new_subset', 5),
-    'no_match': ('new_label', 6)
+    'matches_other_query': ('none', 2),
+    'exact': ('none', 3),
+    'query_is_existing_sub': ('none', 4),
+    'query_is_super': ('add_new_superset', 5),
+    'query_is_new_sub': ('add_new_subset', 6),
+    'no_match': ('new_label', 7)
 }
 
 
@@ -141,6 +142,9 @@ def query_database(args):
     if label_database is None or query_seqs is None:
         return
 
+    new_labels = {}     # labels added so far (with their associated id), used to check against queries
+    postponed = {}      # queries postponed until others in the set are added
+
     with open(args.result_file, 'w', newline='') as fo, open(args.action_file, 'w', newline='') as fa:
         res_writer = csv.DictWriter(fo, fieldnames=query_result_cols)
         res_writer.writeheader()
@@ -150,15 +154,32 @@ def query_database(args):
         for seq_id, seq in query_seqs.items():
             res = {'seq_id': seq_id, 'sequence': seq, 'match': '', 'matched_label': '', 'matched_sequence': ''}
             action = {'seq_id': seq_id, 'sequence': seq, 'action': 'new_label', 'label': '', 'reason': 'no_match'}
+            match_found = False
+
             m = re.search('[^ACGT]', seq)
             if m is not None:
                 res['match'] = 'invalid_nuc'
-                res_writer.writerow(res)
                 action['action'] = actions_and_priorities[res['match']]
                 action['reason'] = res['match']
-                act_writer.writerow(action)
-            else:
-                match_found = False
+                res_writer.writerow(res)
+                match_found = True
+
+            # have we already processed a subset or superset of this sequence in this batch of queries?
+            # if so, postpone judgement on this one until others in the batch have been added to the database
+
+            if not match_found:
+                for match_id, match in new_labels.items():
+                    if match in seq or seq in match:
+                        res['match'] = 'matches_other_query'
+                        res['matched_label'] = match_id
+                        res['matched_sequence'] = match
+                        action['action'] = actions_and_priorities[res['match']][0]
+                        action['reason'] = res['match']
+                        res_writer.writerow(res)
+                        postponed[seq_id] = seq
+                        match_found = True
+
+            if not match_found:
                 for row in label_database.values():
                     res['match'] = ''
                     if seq == row['longest_seq']:
@@ -182,10 +203,23 @@ def query_database(args):
                             action['label'] = res['matched_label']
                             action['reason'] = res['match']
 
-                if not match_found:
-                    res_writer.writerow(res)
+            # Note that we can get >1 match (subs and supers) but only ever get one action after applying priorities
+            if not match_found:
+                res_writer.writerow(res)
 
-                act_writer.writerow(action)
+            act_writer.writerow(action)
+
+            if action['action'] == 'new_label':
+                new_labels[seq_id] = seq
+
+    if len(postponed) > 0:
+        if '.fasta' in args.query_file:
+            p_file = args.query_file.replace('.fasta', '_postponed.fasta')
+        else:
+            p_file = args.query_file + '_postponed'
+
+        print ('writing postponed queries to %s' % p_file)
+        simple.write_fasta(postponed, p_file)
 
 
 def generate_new_label(label_database):
@@ -256,6 +290,7 @@ def add_database(args):
                         continue
 
                 label_database[row['label']]['sequences'] += ',' + row['sequence']
+                label_database[row['label']]['last_updated'] = timestamp
             elif row['action'] == 'add_new_superset':
                 if label_database[row['label']]['longest_seq'] not in row['sequence']:
                     print('Error. Sequence id %s is not a superset of label %s. Action ignored.')
@@ -263,6 +298,7 @@ def add_database(args):
 
                 label_database[row['label']]['sequences'] += ',' + row['sequence']
                 label_database[row['label']]['longest_seq'] = row['sequence']
+                label_database[row['label']]['last_updated'] = timestamp
 
     write_label_database(label_database, args.database_file)
 

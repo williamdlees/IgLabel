@@ -8,7 +8,7 @@ of the
 [AIRR Community](https://www.antibodysociety.org/the-airr-community/). This is an experimental 
 work-in-progress.
 
-Draft documents omn which it is based:
+Draft documents on which it is based:
 
 Outline schema for germline database management: 
 - [document](), [schema]() (links not working as yet, to be updated)
@@ -152,7 +152,7 @@ Database written to mouse_b6.csv. Previous version saved as mouse_b6_old.csv
 
 ![mouse_b6.csv](mouse_b62.png)
 
-Finally, running Query again tells us that all these sequences are accounted for, and suggests
+Running Query again tells us that all these sequences are accounted for, and suggests
 no actions:
 
 ```commandline
@@ -167,4 +167,27 @@ Results file:
 Actions file:
 
 ![actions.csv](actions3.PNG)
+
+One further possibility is that the query file contains unmatched sequences which are sub- or super-sequences
+of other query sequences. In this case, the recommended action will be 'none', with a suitable
+explanation. These postponed sequences will be written to a file, so that they can be re-presented
+in a new query once other sequences have been added. 
+
+`seq3.fasta` contains two sequences, and the second is a super-sequence of the first:
+
+```commandline
+python ..\iglabel.py query mouse_b6.csv seq3.fasta results.csv actions.csv
+Querying database "mouse_b6.csv" for sequences in "seq3.fasta"
+writing postponed queries to seq3_postponed.fasta
+```
+Results file:
+
+![results.csv](results4.PNG)
+
+Actions file:
+
+![actions.csv](actions4.PNG)
+
+
+
 
