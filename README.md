@@ -1,7 +1,7 @@
 # IgLabel
-## Manage allocation of temporary labels for IG alleles
+## Manage allocation of temporary labels for IG/TR alleles
 
-This script will allocate 'temporary labels' for newly discovered IG alleles in accordance with 
+This script will allocate 'temporary labels' for newly discovered IG or TR receptor alleles in accordance with 
 the schema and process defined by the 
 [Germline Database Working Group](https://www.antibodysociety.org/the-airr-community/airr-working-groups/germline_database/) 
 of the 

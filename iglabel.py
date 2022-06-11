@@ -268,7 +268,7 @@ def add_database(args):
 
     with open(args.action_file, 'r') as fi:
         reader = csv.DictReader(fi)
-        timestamp = datetime.now().strftime('%Y-%M-%d %H:%M:%S')
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         for row in reader:
             if row['action'] == 'new_label':
                 entry = {
