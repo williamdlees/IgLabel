@@ -11,7 +11,7 @@ work-in-progress.
 Draft documents on which it is based:
 
 Outline schema for germline database management: 
-- [document](), [schema]() (links not working as yet, to be updated)
+- [document](https://docs.google.com/document/d/1p51yxe6Zyueeu_B0WIEqhepXdSXMN0WuTgw_YuE87t4/edit#heading=h.l5rzgjmcjyen), [schema](https://miro.com/app/board/o9J_lGrzcnc=/)
 - [Specification for this script](https://docs.google.com/document/d/1Top32CXCL2uOyjfHl54ebJEG43Jnc2oAoRjq5e6niEA/edit?usp=sharing)
 
 ## Installation
