@@ -159,7 +159,7 @@ def query_database(args):
             m = re.search('[^ACGT]', seq)
             if m is not None:
                 res['match'] = 'invalid_nuc'
-                action['action'] = actions_and_priorities[res['match']]
+                action['action'] = actions_and_priorities[res['match']][0]
                 action['reason'] = res['match']
                 res_writer.writerow(res)
                 match_found = True
@@ -259,7 +259,7 @@ def add_database(args):
             if row['label'] != '' and row['label'] not in label_database:
                 print('Error: the action file refers to label %s, which is not in the database. The action file has not been processed.')
                 return
-            if len(row['sequence']) == 0 or re.search('[^ACGT]', row['sequence']) is not None:
+            if (len(row['sequence']) == 0 or re.search('[^ACGT]', row['sequence']) is not None) and row['action'] != 'none':
                 print('Error: sequence id %s has an invalid sequence (sequences may only contain the letters ACGT and may not be blank. The action file has not been processed.' % row['seq_id'])
                 return
             if row['action'] not in ['none', 'add_new_superset', 'add_new_subset', 'new_label']:
@@ -293,7 +293,7 @@ def add_database(args):
                 label_database[row['label']]['last_updated'] = timestamp
             elif row['action'] == 'add_new_superset':
                 if label_database[row['label']]['longest_seq'] not in row['sequence']:
-                    print('Error. Sequence id %s is not a superset of label %s. Action ignored.')
+                    print('Error. Sequence id %s is not a superset of label %s. Action ignored.' % (row['seq_id'], row['label']))
                     continue
 
                 label_database[row['label']]['sequences'] += ',' + row['sequence']

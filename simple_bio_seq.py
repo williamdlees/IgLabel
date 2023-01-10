@@ -10,6 +10,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Align import MultipleSeqAlignment, AlignInfo
 import random
+import csv
 
 
 def read_fasta(infile):
@@ -107,3 +108,35 @@ def dumb_consensus(seqs, threshold):
     msa = MultipleSeqAlignment(toSeqRecords(seqs))
     summary_align = AlignInfo.SummaryInfo(msa)
     return summary_align.dumb_consensus(threshold=threshold)
+
+
+# Read csv file into a list of dicts
+def read_csv(file, delimiter=None):
+    ret = []
+    with open(file, 'r') as fi:
+        if delimiter:
+            reader = csv.DictReader(fi, delimiter=delimiter)
+        else:
+            reader = csv.DictReader(fi)
+        for row in reader:
+            ret.append(row)
+
+    return ret
+
+
+# Write csv file given a list of dicts. Fieldnames are taken from the first row
+def write_csv(file, rows, delimiter=None):
+    if not rows:
+        return
+
+    fieldnames = rows[0].keys()
+    with open(file, 'w', newline='') as fo:
+        if delimiter:
+            writer = csv.DictWriter(fo, fieldnames=fieldnames, delimiter=delimiter)
+        else:
+            writer = csv.DictWriter(fo, fieldnames=fieldnames)
+
+        writer.writeheader()
+
+        for row in rows:
+            writer.writerow(row)
