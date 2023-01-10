@@ -7,7 +7,7 @@ the schema and process defined by the
 of the 
 [AIRR Community](https://www.antibodysociety.org/the-airr-community/). 
 
-For further details please see our [preprint][https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4265552]
+For further details please see our [preprint](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4265552)
 
 ## Installation
 
