@@ -5,14 +5,9 @@ This script will allocate 'temporary labels' for newly discovered IG or TR recep
 the schema and process defined by the 
 [Germline Database Working Group](https://www.antibodysociety.org/the-airr-community/airr-working-groups/germline_database/) 
 of the 
-[AIRR Community](https://www.antibodysociety.org/the-airr-community/). This is an experimental 
-work-in-progress.
+[AIRR Community](https://www.antibodysociety.org/the-airr-community/). 
 
-Draft documents on which it is based:
-
-Outline schema for germline database management: 
-- [document](https://docs.google.com/document/d/1p51yxe6Zyueeu_B0WIEqhepXdSXMN0WuTgw_YuE87t4/edit#heading=h.l5rzgjmcjyen), [schema](https://miro.com/app/board/o9J_lGrzcnc=/)
-- [Specification for this script](https://docs.google.com/document/d/1Top32CXCL2uOyjfHl54ebJEG43Jnc2oAoRjq5e6niEA/edit?usp=sharing)
+For further details please see our [preprint][https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4265552]
 
 ## Installation
 
